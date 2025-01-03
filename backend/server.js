@@ -9,7 +9,6 @@ import routes from './routes.js'
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
@@ -19,7 +18,7 @@ app.use(express.json());
 app.use('/', routes);
 
 app.listen(process.env.PORT, () => {
-  console.log(`server running on port ${process.env.port}`);
+  console.log(`server running on port ${process.env.PORT}`);
   mongoose
     .connect(process.env.MONGO_URI)
     .then(() => {
