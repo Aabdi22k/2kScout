@@ -139,16 +139,15 @@ const Main = () => {
     localStorage.setItem("deletedPlayers", JSON.stringify([]));
     localStorage.setItem("team", JSON.stringify([]));
     setDeletedPlayers([]);
-    setTeam([])
+    setTeam([]);
 
     // Add all deleted players back to their positions
     allDeletedPlayers.forEach((player) => {
       addPlayerToPosition(player); // Restore each player back to their position
     });
     allTeamPlayers.forEach((player) => {
-      
-      addPlayerToPosition(player)
-    })
+      addPlayerToPosition(player);
+    });
   };
 
   useEffect(() => {
@@ -249,22 +248,73 @@ const Main = () => {
     { name: "Center", players: cs },
   ];
 
+  const [showModal, setShowModal] = useState(true);
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   if (playerLoading) return <div>Loading...</div>;
   if (playerError) return <div>{playerError}</div>;
   return (
     <div>
-      <div className="w-full bg-neutral-800 shadow-lg h-screen overflow-hidden p-8">
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={closeModal}>
+          <div className="bg-neutral-800 text-neutral-50 rounded-lg shadow-lg max-w-md w-full p-6 relative">
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 text-neutral-50 text-xl font-bold hover:scale-110 transition-transform"
+            >
+              &#x2715; {/* Unicode for "X" */}
+            </button>
+
+            {/* Modal Content */}
+            <h2 className="text-2xl font-semibold mb-4">
+              Welcome to 2K Scout!
+            </h2>
+            <p className="mb-4">
+              This tool helps you build your Fantasy Basketball team effectively based on 2K25 stats for each player. Below are the top 100 players from each position (500 total). Follow
+              the instructions below to get started:
+            </p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>Scroll down to find the other positions</li>
+              <li>Scroll through the positions to find a player</li>
+              <li>Add players to your team using the "+" button.</li>
+              <li>Remove players using the "−" button.</li>
+              <li>Undo deletions with the "Undo Delete" button.</li>
+              <li>Reset everything with the "Reset" button.</li>
+              <li>View the directions again with the "Directions" button</li>
+            </ul>
+          </div>
+        </div>
+      )}
+      <div className="w-full bg-neutral-800 shadow-lg overflow-y-scroll p-8">
         {" "}
         <header className="flex justify-between px-4 items-center pb-8">
           <h1 className="text-3xl font-title text-neutral-50">2K Scout</h1>
-          <div className="flex gap-12">
-            <button className="bg-neutral-700 px-3 py-2 text-neutral-50 font-semibold rounded-lg hover:scale-105 transition-transform" onClick={() => handleUndoDeletePlayer()}>
+          <div className="flex gap-6">
+            <button
+              className="bg-neutral-700 px-3 py-2 text-neutral-50 font-semibold rounded-lg hover:scale-105 transition-transform"
+              onClick={() => handleUndoDeletePlayer()}
+            >
               Undo Delete
             </button>
-            <button className="bg-neutral-700 px-3 py-2 text-neutral-50 font-semibold rounded-lg hover:scale-105 transition-transform" onClick={() => handleReset()}>Reset</button>
+            <button
+              className="bg-neutral-700 px-3 py-2 text-neutral-50 font-semibold rounded-lg hover:scale-105 transition-transform"
+              onClick={() => handleReset()}
+            >
+              Reset
+            </button>
+            <button
+              className="bg-neutral-700 px-3 py-2 text-neutral-50 font-semibold rounded-lg hover:scale-105 transition-transform"
+              onClick={() => setShowModal(true)}
+            >
+              Directions
+            </button>
           </div>
         </header>
-        <div className="grid  grid-cols-3 grid-rows-2 h-full gap-6 pb-16">
+        <div className="grid  grid-cols-1 md2:grid-cols-2 lg2:grid-cols-3 grid-rows-2 h-full gap-8 pb-16">
           <div className="bg-neutral-700 shadow-md rounded-md  p-6">
             <h2 className="text-lg font-semibold text-neutral-50 pb-4">
               My Team
@@ -320,7 +370,7 @@ const Main = () => {
                 {name}
               </h2>
               <div className="w-full max-h-[400px] overflow-y-scroll">
-                <table className="w-full table-auto text-neutral-50 border-collapse">
+                <table className="w-full  text-neutral-50 border-collapse">
                   <thead className="bg-neutral-600 sticky top-0 z-10">
                     <tr>
                       <th className="text-left p-3">#</th>
@@ -337,16 +387,24 @@ const Main = () => {
                     {players.map((player, index) => (
                       <tr key={player._id} className="hover:bg-neutral-600">
                         <td className="p-3">{index + 1}</td>
-                        <td className="p-3 flex gap-6">
-                          <div className="w-[48px] h-[48px] rounded-full pt-3 overflow-clip bg-[#afafaf]">
+                        <td className="p-3 flex gap-6 ">
+                          {/* Player Image */}
+                          <div className="w-[48px] h-[48px] rounded-full pt-3 overflow-hidden bg-[#afafaf] flex items-center justify-center">
                             <img
                               src={player.img}
                               alt={player.name}
-                              className=" rounded-full w-[48px] h-[35px] scale-150 "
+                              className="rounded-full w-[48px] h-[35px] scale-150"
                             />
                           </div>
-                          <span>{player.name}</span>
+
+                          {/* Player Name */}
+                          <div>
+                            <span className="flex whitespace-nowrap overflow-hidden">
+                              {player.name}
+                            </span>
+                          </div>
                         </td>
+
                         <td className="p-3">{player.overall}</td>
                         <td
                           className="text-center px-3 text-2xl text-green-500 cursor-pointer"
