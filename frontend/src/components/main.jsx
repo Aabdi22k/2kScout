@@ -1,16 +1,31 @@
 import React, { useState, useEffect } from "react";
 import usePlayers from "../hooks/usePlayers";
-import useDeletePlayer from "../hooks/useDeletePlayer.js";
-import useAddPlayer from "../hooks/useAddPlayer.js";
 const Main = () => {
-  const getTeam = () => {
+  const {
+    pgPlayers,
+    sgPlayers,
+    sfPlayers,
+    pfPlayers,
+    cPlayers,
+    loading: playerLoading,
+    error: playerError,
+  } = usePlayers("http://localhost:5000/players");
+
+  const [pgs, setpgs] = useState([]);
+  const [sgs, setsgs] = useState([]);
+  const [sfs, setsfs] = useState([]);
+  const [pfs, setpfs] = useState([]);
+  const [cs, setcs] = useState([]);
+
+  // Reset Team
+  const reset = () => {
     localStorage.setItem('team', JSON.stringify([]))
     return []; // return an empty team if none exists
   };
-  const [team, setTeam] = useState(getTeam() || []);
 
-  const { deletePlayer } = useDeletePlayer();
+  const [team, setTeam] = useState(reset());
 
+  // remove player from list depending on Position
   const deletePlayerFromPosition = (player) => {
     if (player.position === "point-guard") {
       setpgs((prevPgs) => prevPgs.filter((p) => p._id !== player._id));
@@ -24,22 +39,8 @@ const Main = () => {
       setcs((prevCs) => prevCs.filter((p) => p._id !== player._id));
     }
   };
-  
 
-  const handleAddPlayer = async (player) => {
-    // Step 1: Delete the player from the player list using the useDeletePlayer hook
-    deletePlayerFromPosition(player)
-
-    // Step 2: Update the team in localStorage
-    const currentTeam = JSON.parse(localStorage.getItem("team")) || [];
-    const updatedTeam = [...currentTeam, player]; // Add player to the team
-    localStorage.setItem("team", JSON.stringify(updatedTeam)); // Save the updated team
-    setTeam(updatedTeam);
-  };
-
-  // Add player back to the list using the custom hook
-  const { addPlayer } = useAddPlayer(); // Assuming the hook gives us an addPlayer function
-
+  // Add player to list depending on Position
   const addPlayerToPosition = (player) => {
     if (player.position === "point-guard") {
       setpgs((prevPgs) => {
@@ -69,8 +70,19 @@ const Main = () => {
     }
   };
   
+  // Handle Adding player to the team and removing them from their list
+  const handleAddPlayer = async (player) => {
+    // Step 1: Delete the player from the player list using the useDeletePlayer hook
+    deletePlayerFromPosition(player)
 
-  // Handle deleting player from the team and adding them back to the list
+    // Step 2: Update the team in localStorage
+    const currentTeam = JSON.parse(localStorage.getItem("team")) || [];
+    const updatedTeam = [...currentTeam, player]; // Add player to the team
+    localStorage.setItem("team", JSON.stringify(updatedTeam)); // Save the updated team
+    setTeam(updatedTeam);
+  };
+  
+  // Handle deleting player from the team and adding them back to their list
   const handleDeletePlayerFromTeam = (playerId, player) => {
     // Filter out the player with the given id
     const updatedTeam = team.filter((player) => player._id !== playerId);
@@ -86,25 +98,10 @@ const Main = () => {
     addPlayerToPosition(player)
   };
 
+  // Handle remove player from their respective list
   const handleDeletePlayer = (player) => {
     deletePlayerFromPosition(player)
   };
-
-  const {
-    pgPlayers,
-    sgPlayers,
-    sfPlayers,
-    pfPlayers,
-    cPlayers,
-    loading: playerLoading,
-    error: playerError,
-  } = usePlayers("http://localhost:5000/players");
-
-  const [pgs, setpgs] = useState([]);
-  const [sgs, setsgs] = useState([]);
-  const [sfs, setsfs] = useState([]);
-  const [pfs, setpfs] = useState([]);
-  const [cs, setcs] = useState([]);
 
   // Use useEffect to update state when players are fetched
   useEffect(() => {
