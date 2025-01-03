@@ -1,7 +1,5 @@
 import express from "express";
 import Player from "./models/Player.js";
-import Team from './models/Team.js';
-
 const router = express.Router();
 
 // Get all players
