@@ -21,7 +21,7 @@ app.use('/', routes);
 app.listen(process.env.PORT, () => {
   console.log(`server running on port ${process.env.port}`);
   mongoose
-    .connect(process.env.MONGODB_URI)
+    .connect(process.env.MONGO_URI)
     .then(() => {
       console.log("connected to mongodb");
     })
