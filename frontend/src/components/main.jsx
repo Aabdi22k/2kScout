@@ -9,7 +9,7 @@ const Main = () => {
     cPlayers,
     loading: playerLoading,
     error: playerError,
-  } = usePlayers("http://localhost:5000/players");
+  } = usePlayers("https://twokscout.onrender.com/players");
 
   const [pgs, setpgs] = useState([]);
   const [sgs, setsgs] = useState([]);
