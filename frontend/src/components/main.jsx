@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import usePlayers from "../hooks/usePlayers";
 const Main = () => {
+  const getDeletedPlayers = () => {
+    const deletedPlayers = JSON.parse(localStorage.getItem("deletedPlayers"));
+    return deletedPlayers || [];
+  };
+  const [deletedPlayers, setDeletedPlayers] = useState(getDeletedPlayers());
   const {
     pgPlayers,
     sgPlayers,
@@ -100,6 +105,50 @@ const Main = () => {
   // Handle remove player from their respective list
   const handleDeletePlayer = (player) => {
     deletePlayerFromPosition(player);
+    const updatedDeletedPlayers = [...deletedPlayers, player];
+    localStorage.setItem(
+      "deletedPlayers",
+      JSON.stringify(updatedDeletedPlayers)
+    );
+    setDeletedPlayers(updatedDeletedPlayers);
+  };
+
+  const handleUndoDeletePlayer = () => {
+    // If there are deleted players, undo the last deletion
+    if (deletedPlayers.length > 0) {
+      const lastDeletedPlayer = deletedPlayers[deletedPlayers.length - 1];
+      const updatedDeletedPlayers = deletedPlayers.slice(
+        0,
+        deletedPlayers.length - 1
+      ); // Remove last player
+      localStorage.setItem(
+        "deletedPlayers",
+        JSON.stringify(updatedDeletedPlayers)
+      );
+      setDeletedPlayers(updatedDeletedPlayers);
+
+      // Add the last deleted player back to their original position
+      addPlayerToPosition(lastDeletedPlayer);
+    }
+  };
+
+  const handleReset = () => {
+    // Clear all deleted players from state and localStorage
+    const allDeletedPlayers = [...deletedPlayers];
+    const allTeamPlayers = [...team];
+    localStorage.setItem("deletedPlayers", JSON.stringify([]));
+    localStorage.setItem("team", JSON.stringify([]));
+    setDeletedPlayers([]);
+    setTeam([])
+
+    // Add all deleted players back to their positions
+    allDeletedPlayers.forEach((player) => {
+      addPlayerToPosition(player); // Restore each player back to their position
+    });
+    allTeamPlayers.forEach((player) => {
+      
+      addPlayerToPosition(player)
+    })
   };
 
   useEffect(() => {
@@ -109,27 +158,71 @@ const Main = () => {
       setsfs(sfPlayers || []);
       setpfs(pfPlayers || []);
       setcs(cPlayers || []);
-  
+
       // Check for team in localStorage
       const team = JSON.parse(localStorage.getItem("team"));
+      const deletedPlayers = JSON.parse(localStorage.getItem("deletedPlayers"));
       if (team && team.length > 0) {
         // Loop through the team and remove players from the respective positions
         team.forEach((player) => {
           switch (player.position) {
             case "point-guard":
-              setpgs((prevPgs) => prevPgs.filter((prevplayer) => prevplayer._id !== player._id));
+              setpgs((prevPgs) =>
+                prevPgs.filter((prevplayer) => prevplayer._id !== player._id)
+              );
               break;
             case "shooting-guard":
-              setsgs((prevSgs) => prevSgs.filter((prevplayer) => prevplayer._id !== player._id));
+              setsgs((prevSgs) =>
+                prevSgs.filter((prevplayer) => prevplayer._id !== player._id)
+              );
               break;
             case "small-forward":
-              setsfs((prevSfs) => prevSfs.filter((prevplayer) => prevplayer._id !== player._id));
+              setsfs((prevSfs) =>
+                prevSfs.filter((prevplayer) => prevplayer._id !== player._id)
+              );
               break;
             case "power-forward":
-              setpfs((prevPfs) => prevPfs.filter((prevplayer) => prevplayer._id !== player._id));
+              setpfs((prevPfs) =>
+                prevPfs.filter((prevplayer) => prevplayer._id !== player._id)
+              );
               break;
             case "center":
-              setcs((prevCs) => prevCs.filter((prevplayer) => prevplayer._id !== player._id));
+              setcs((prevCs) =>
+                prevCs.filter((prevplayer) => prevplayer._id !== player._id)
+              );
+              break;
+            default:
+              break;
+          }
+        });
+      }
+      if (deletedPlayers && deletedPlayers.length > 0) {
+        deletedPlayers.forEach((player) => {
+          switch (player.position) {
+            case "point-guard":
+              setpgs((prevPgs) =>
+                prevPgs.filter((prevplayer) => prevplayer._id !== player._id)
+              );
+              break;
+            case "shooting-guard":
+              setsgs((prevSgs) =>
+                prevSgs.filter((prevplayer) => prevplayer._id !== player._id)
+              );
+              break;
+            case "small-forward":
+              setsfs((prevSfs) =>
+                prevSfs.filter((prevplayer) => prevplayer._id !== player._id)
+              );
+              break;
+            case "power-forward":
+              setpfs((prevPfs) =>
+                prevPfs.filter((prevplayer) => prevplayer._id !== player._id)
+              );
+              break;
+            case "center":
+              setcs((prevCs) =>
+                prevCs.filter((prevplayer) => prevplayer._id !== player._id)
+              );
               break;
             default:
               break;
@@ -146,7 +239,6 @@ const Main = () => {
     playerLoading,
     playerError,
   ]);
-  
 
   // Map positions to their respective player arrays
   const positions = [
@@ -163,8 +255,14 @@ const Main = () => {
     <div>
       <div className="w-full bg-neutral-800 shadow-lg h-screen overflow-hidden p-8">
         {" "}
-        <header className="flex justify-center items-center pb-8">
+        <header className="flex justify-between px-4 items-center pb-8">
           <h1 className="text-3xl font-title text-neutral-50">2K Scout</h1>
+          <div className="flex gap-12">
+            <button className="bg-neutral-700 px-3 py-2 text-neutral-50 font-semibold rounded-lg hover:scale-105 transition-transform" onClick={() => handleUndoDeletePlayer()}>
+              Undo Delete
+            </button>
+            <button className="bg-neutral-700 px-3 py-2 text-neutral-50 font-semibold rounded-lg hover:scale-105 transition-transform" onClick={() => handleReset()}>Reset</button>
+          </div>
         </header>
         <div className="grid  grid-cols-3 grid-rows-2 h-full gap-6 pb-16">
           <div className="bg-neutral-700 shadow-md rounded-md  p-6">
