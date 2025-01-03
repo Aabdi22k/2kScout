@@ -19,11 +19,15 @@ const Main = () => {
 
   // Reset Team
   const reset = () => {
-    localStorage.setItem('team', JSON.stringify([]))
-    return []; // return an empty team if none exists
+    localStorage.setItem("team", JSON.stringify([]));
   };
 
-  const [team, setTeam] = useState(reset());
+  const getTeam = () => {
+    const team = localStorage.getItem("team")
+    return team || []
+  }
+
+  const [team, setTeam] = useState(getTeam());
 
   // remove player from list depending on Position
   const deletePlayerFromPosition = (player) => {
@@ -69,11 +73,11 @@ const Main = () => {
       });
     }
   };
-  
+
   // Handle Adding player to the team and removing them from their list
   const handleAddPlayer = async (player) => {
     // Step 1: Delete the player from the player list using the useDeletePlayer hook
-    deletePlayerFromPosition(player)
+    deletePlayerFromPosition(player);
 
     // Step 2: Update the team in localStorage
     const currentTeam = JSON.parse(localStorage.getItem("team")) || [];
@@ -81,7 +85,7 @@ const Main = () => {
     localStorage.setItem("team", JSON.stringify(updatedTeam)); // Save the updated team
     setTeam(updatedTeam);
   };
-  
+
   // Handle deleting player from the team and adding them back to their list
   const handleDeletePlayerFromTeam = (playerId, player) => {
     // Filter out the player with the given id
@@ -95,12 +99,12 @@ const Main = () => {
 
     // Add player back to the player list using the addPlayer hook
     // addPlayer(player); // Assuming this is the function that adds a player back to the list
-    addPlayerToPosition(player)
+    addPlayerToPosition(player);
   };
 
   // Handle remove player from their respective list
   const handleDeletePlayer = (player) => {
-    deletePlayerFromPosition(player)
+    deletePlayerFromPosition(player);
   };
 
   // Use useEffect to update state when players are fetched
@@ -122,6 +126,9 @@ const Main = () => {
     playerError,
   ]);
 
+  useEffect(() => {
+    reset();
+  });
   // Map positions to their respective player arrays
   const positions = [
     { name: "Point Guard", players: pgs },
@@ -230,7 +237,10 @@ const Main = () => {
                         >
                           &#43;
                         </td>
-                        <td className="text-center px-3 text-2xl text-red-500 cursor-pointer" onClick={() => handleDeletePlayer(player)} >
+                        <td
+                          className="text-center px-3 text-2xl text-red-500 cursor-pointer"
+                          onClick={() => handleDeletePlayer(player)}
+                        >
                           &#8722;
                         </td>
                       </tr>
