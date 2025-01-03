@@ -17,15 +17,10 @@ const Main = () => {
   const [pfs, setpfs] = useState([]);
   const [cs, setcs] = useState([]);
 
-  // Reset Team
-  const reset = () => {
-    localStorage.setItem("team", JSON.stringify([]));
-  };
-
   const getTeam = () => {
-    const team = localStorage.getItem("team")
-    return team || []
-  }
+    const team = JSON.parse(localStorage.getItem("team"));
+    return team || []; // return an empty team if none exists
+  };
 
   const [team, setTeam] = useState(getTeam());
 
@@ -107,7 +102,6 @@ const Main = () => {
     deletePlayerFromPosition(player);
   };
 
-  // Use useEffect to update state when players are fetched
   useEffect(() => {
     if (!playerLoading && !playerError) {
       setpgs(pgPlayers || []);
@@ -115,6 +109,33 @@ const Main = () => {
       setsfs(sfPlayers || []);
       setpfs(pfPlayers || []);
       setcs(cPlayers || []);
+  
+      // Check for team in localStorage
+      const team = JSON.parse(localStorage.getItem("team"));
+      if (team && team.length > 0) {
+        // Loop through the team and remove players from the respective positions
+        team.forEach((player) => {
+          switch (player.position) {
+            case "point-guard":
+              setpgs((prevPgs) => prevPgs.filter((prevplayer) => prevplayer._id !== player._id));
+              break;
+            case "shooting-guard":
+              setsgs((prevSgs) => prevSgs.filter((prevplayer) => prevplayer._id !== player._id));
+              break;
+            case "small-forward":
+              setsfs((prevSfs) => prevSfs.filter((prevplayer) => prevplayer._id !== player._id));
+              break;
+            case "power-forward":
+              setpfs((prevPfs) => prevPfs.filter((prevplayer) => prevplayer._id !== player._id));
+              break;
+            case "center":
+              setcs((prevCs) => prevCs.filter((prevplayer) => prevplayer._id !== player._id));
+              break;
+            default:
+              break;
+          }
+        });
+      }
     }
   }, [
     pgPlayers,
@@ -125,10 +146,8 @@ const Main = () => {
     playerLoading,
     playerError,
   ]);
+  
 
-  useEffect(() => {
-    reset();
-  });
   // Map positions to their respective player arrays
   const positions = [
     { name: "Point Guard", players: pgs },
